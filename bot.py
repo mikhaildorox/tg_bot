@@ -12,19 +12,19 @@ bot = telebot.TeleBot('')
 def start_command(message):
     bot.reply_to(message, "Привет! Я твой Бот! Чем могу помочь?")
 
-    # # Клавиатура с двумя кнопками
-    # keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-    #
-    # # Создание кнопок с callback-данными
-    # button1 = types.KeyboardButton('Кнопка 1')
-    # button2 = types.KeyboardButton('Кнопка 2')
-
     # Клавиатура с двумя кнопками
-    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 
     # Создание кнопок с callback-данными
-    button1 = types.InlineKeyboardButton('Кнопка 1', callback_data='data1')
-    button2 = types.InlineKeyboardButton('Кнопка 2', callback_data='data2')
+    button1 = types.KeyboardButton('Кнопка 1')
+    button2 = types.KeyboardButton('Кнопка 2')
+
+    # # Клавиатура с двумя кнопками
+    # keyboard = types.InlineKeyboardMarkup(row_width=2)
+    #
+    # # Создание кнопок с callback-данными
+    # button1 = types.InlineKeyboardButton('Кнопка 1', callback_data='data1')
+    # button2 = types.InlineKeyboardButton('Кнопка 2', callback_data='data2')
 
     # Добавление кнопок на клавиатуру
     keyboard.add(button1, button2)
@@ -33,6 +33,7 @@ def start_command(message):
     bot.send_message(message.chat.id, "Выберите опцию: ", reply_markup=keyboard)
 
 
+#  клавиатура inline
 @bot.callback_query_handler(func=lambda call: True)
 def handler_query(call):
     # Проверяем callback-данные и отправляем ответ
@@ -40,6 +41,16 @@ def handler_query(call):
         bot.send_message(call.message.chat.id, "НАЖАТА кнопка 1")
     elif call.data == "data2":
         bot.send_message(call.message.chat.id, "НАЖАТА кнопка 2")
+
+
+# Клавиатура Reply
+@bot.message_handler(content_types=['text'])
+def handler_text(message):
+    # Проверяем текст сообщения и отправляем ответ
+    if message.text == "Кнопка 1":
+        bot.send_message(message.chat.id, "Вы НАЖАЛИ кнопку 1")
+    elif message.text == "Кнопка 2":
+        bot.send_message(message.chat.id, "Вы НАЖАЛИ кнопку 2")
 
 
 @bot.message_handler(commands=['help', 'about'])
