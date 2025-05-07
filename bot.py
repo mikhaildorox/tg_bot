@@ -17,5 +17,11 @@ def help_command(message):
     bot.reply_to(message, "Раздел помощи. Информация о Боте")
 
 
+# Обработчик тестовых сообщений
+@bot.message_handler(content_types=['text'])
+def handler_text(message):
+    response = f"Ваш текст: {message.text}"
+    bot.send_message(message.chat.id, response)
+
 # Запуск бота
 bot.polling()
