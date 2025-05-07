@@ -12,6 +12,35 @@ bot = telebot.TeleBot('')
 def start_command(message):
     bot.reply_to(message, "Привет! Я твой Бот! Чем могу помочь?")
 
+    # # Клавиатура с двумя кнопками
+    # keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+    #
+    # # Создание кнопок с callback-данными
+    # button1 = types.KeyboardButton('Кнопка 1')
+    # button2 = types.KeyboardButton('Кнопка 2')
+
+    # Клавиатура с двумя кнопками
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
+
+    # Создание кнопок с callback-данными
+    button1 = types.InlineKeyboardButton('Кнопка 1', callback_data='data1')
+    button2 = types.InlineKeyboardButton('Кнопка 2', callback_data='data2')
+
+    # Добавление кнопок на клавиатуру
+    keyboard.add(button1, button2)
+
+    # Отправление сообщений с клавиатуры
+    bot.send_message(message.chat.id, "Выберите опцию: ", reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def handler_query(call):
+    # Проверяем callback-данные и отправляем ответ
+    if call.data == "data1":
+        bot.send_message(call.message.chat.id, "НАЖАТА кнопка 1")
+    elif call.data == "data2":
+        bot.send_message(call.message.chat.id, "НАЖАТА кнопка 2")
+
 
 @bot.message_handler(commands=['help', 'about'])
 def help_command(message):
