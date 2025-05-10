@@ -1,36 +1,59 @@
 #!/usr/bin/python
 # -*- coding: utf-8
 import telebot
+import logging
 from telebot import types
 
 # Экземпляр бота
 bot = telebot.TeleBot('')
 
+# Настройка логирования
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 
 # Обработчик /start
 @bot.message_handler(commands=['start'])
 def start_command(message):
-    bot.reply_to(message, "Привет! Я твой Бот! Чем могу помочь?")
+    try:
+        # Логирование команды старт
+        logger.info("Получена команда /start от пользователя %s", message.chat.id)
+        # Попытка отправить приветственное сообщение пользователю
+        bot.send_message(message.chat.id, "Добро пожаловать!")
+        bot.reply_to(message, "Привет! Я твой Бот! Чем могу помочь?")
 
-    # Клавиатура с двумя кнопками
-    keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+        # Клавиатура с двумя кнопками
+        keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 
-    # Создание кнопок с callback-данными
-    button1 = types.KeyboardButton('Кнопка 1')
-    button2 = types.KeyboardButton('Кнопка 2')
+        # Создание кнопок с callback-данными
+        button1 = types.KeyboardButton('Кнопка 1')
+        button2 = types.KeyboardButton('Кнопка 2')
 
-    # # Клавиатура с двумя кнопками
-    # keyboard = types.InlineKeyboardMarkup(row_width=2)
-    #
-    # # Создание кнопок с callback-данными
-    # button1 = types.InlineKeyboardButton('Кнопка 1', callback_data='data1')
-    # button2 = types.InlineKeyboardButton('Кнопка 2', callback_data='data2')
+        # # Клавиатура с двумя кнопками
+        # keyboard = types.InlineKeyboardMarkup(row_width=2)
+        #
+        # # Создание кнопок с callback-данными
+        # button1 = types.InlineKeyboardButton('Кнопка 1', callback_data='data1')
+        # button2 = types.InlineKeyboardButton('Кнопка 2', callback_data='data2')
 
-    # Добавление кнопок на клавиатуру
-    keyboard.add(button1, button2)
+        # Добавление кнопок на клавиатуру
+        keyboard.add(button1, button2)
 
-    # Отправление сообщений с клавиатуры
-    bot.send_message(message.chat.id, "Выберите опцию: ", reply_markup=keyboard)
+        # Отправление сообщений с клавиатуры
+        bot.send_message(message.chat.id, "Выберите опцию: ", reply_markup=keyboard)
+    except telebot.apihelper.ApiException as e:
+        print(f"Ошибка при отправке сообщения: {e}")
+        logger.error("Ошибка при отправке сообщения. Пожалуйста свяжите с поддержкой.")
+        bot.send_message(message.chat.id, "Произошла ошибка при отправке сообщения. Попробуйте позже.")
+    except Exception as e:
+        print(f"Неизвестная ошибка: {e}")
+        bot.send_message(message.chat.id, "Произошла неизвестная ошибка. Свяжитесь с поддержкой.")
+    else:
+        print("Сообщение отправлено.")
+        logger.info("Сообщение успешно отправлено пользователю %s", message.chat.id)
+    finally:
+        print("Завершение работы команды /start")
+        logger.info("Завершение обработки команды /start для пользователя %s", message.chat.id)
 
 
 #  клавиатура inline
