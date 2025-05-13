@@ -5,6 +5,8 @@ import logging
 import sqlite3
 from telebot import types
 
+from db import cursor
+
 # Экземпляр бота
 bot = telebot.TeleBot('')
 
@@ -54,7 +56,24 @@ def process_read_step(message):
         bot.reply_to(message, f"Произошла ошибка: {e}")
 
 
+#
+@bot.message_handler(commands=['update'])
+def update_user(message):
+    msg = bot.reply_to(message, "Введите имя пользователя и новый возраст через пробел: ")
+    bot.register_next_step_handler(msg, process_update_step)
 
+def process_update_step(message):
+    try:
+        username, age = message.text.split()
+        age = int(age)
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET age = ? WHERE username = ?', (age, username))
+        conn.commit()
+        conn.close()
+        bot.reply_to(message, "Пользователь обновлен!")
+    except Exception as e:
+        bot.reply_to(message, f"Произошла ошибка: {e}")
 
 
 
