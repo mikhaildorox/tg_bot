@@ -10,15 +10,18 @@ from db import cursor
 # Экземпляр бота
 bot = telebot.TeleBot('')
 
+
 #
 def get_db_connection():
     conn = sqlite3.connect('bot_database.db')
     return conn
 
+
 @bot.message_handler(commands=['create'])
 def create_user(message):
     msg = bot.reply_to(message, "Введите имя пользователя и возраст через пробел: ")
     bot.register_next_step_handler(msg, process_create_step)
+
 
 def process_create_step(message):
     try:
@@ -39,6 +42,7 @@ def process_create_step(message):
 def read_user(message):
     msg = bot.reply_to(message, "Введите имя пользователя для поиска: ")
     bot.register_next_step_handler(msg, process_read_step)
+
 
 def process_read_step(message):
     try:
@@ -62,16 +66,22 @@ def update_user(message):
     msg = bot.reply_to(message, "Введите имя пользователя и новый возраст через пробел: ")
     bot.register_next_step_handler(msg, process_update_step)
 
+
 def process_update_step(message):
     try:
         username, age = message.text.split()
         age = int(age)
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('UPDATE users SET age = ? WHERE username = ?', (age, username))
-        conn.commit()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user = cursor.fetchone()
+        if user:
+            cursor.execute('UPDATE users SET age = ? WHERE username = ?', (age, username))
+            conn.commit()
+            bot.reply_to(message, "Пользователь обновлен!")
+        else:
+            bot.reply_to(message, "Пользователь не найден.")
         conn.close()
-        bot.reply_to(message, "Пользователь обновлен!")
     except Exception as e:
         bot.reply_to(message, f"Произошла ошибка: {e}")
 
@@ -81,15 +91,21 @@ def delete_user(message):
     msg = bot.reply_to(message, "Введите имя пользователя для удаления")
     bot.register_next_step_handler(msg, process_delete_step)
 
+
 def process_delete_step(message):
     try:
         username = message.text
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('DELETE FROM users WHERE username = ?', (username,))
-        conn.commit()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user = cursor.fetchone()
+        if user:
+            cursor.execute('DELETE FROM users WHERE username = ?', (username,))
+            conn.commit()
+            bot.reply_to(message, f"Пользователь {username} удален!")
+        else:
+            bot.reply_to(message, "Пользователь не найден.")
         conn.close()
-        bot.reply_to(message, f"Пользователь {username} удален!")
     except Exception as e:
         bot.reply_to(message, f"Произошла ошибка: {e}")
 
