@@ -76,6 +76,23 @@ def process_update_step(message):
         bot.reply_to(message, f"Произошла ошибка: {e}")
 
 
+@bot.message_handler(commands=['delete'])
+def delete_user(message):
+    msg = bot.reply_to(message, "Введите имя пользователя для удаления")
+    bot.register_next_step_handler(msg, process_delete_step)
+
+def process_delete_step(message):
+    try:
+        username = message.text
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM users WHERE username = ?', (username,))
+        conn.commit()
+        conn.close()
+        bot.reply_to(message, f"Пользователь {username} удален!")
+    except Exception as e:
+        bot.reply_to(message, f"Произошла ошибка: {e}")
+
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
