@@ -4,12 +4,14 @@ import telebot
 import logging
 import sqlite3
 from telebot import types
+import requests
 
 from db import cursor
 
 # Экземпляр бота
 bot = telebot.TeleBot('')
 
+url = "https://catfact.ninja/fact"
 
 #
 def get_db_connection():
@@ -129,7 +131,7 @@ def start_command(message):
         keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 
         # Создание кнопок с callback-данными
-        button1 = types.KeyboardButton('Кнопка 1')
+        button1 = types.KeyboardButton('CatFact')
         button2 = types.KeyboardButton('Кнопка 2')
 
         # # Клавиатура с двумя кнопками
@@ -173,8 +175,13 @@ def handler_query(call):
 @bot.message_handler(content_types=['text'])
 def handler_text(message):
     # Проверяем текст сообщения и отправляем ответ
-    if message.text == "Кнопка 1":
-        bot.send_message(message.chat.id, "Вы НАЖАЛИ кнопку 1")
+    if message.text == "CatFact":
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            bot.send_message(message.chat.id, str(data["fact"]))
+        else:
+            bot.send_message(message.chat.id, f"Ошибка: {response.status_code}")
     elif message.text == "Кнопка 2":
         bot.send_message(message.chat.id, "Вы НАЖАЛИ кнопку 2")
 
